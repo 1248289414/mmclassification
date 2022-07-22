@@ -62,14 +62,23 @@ def single_gpu_test(model,
                 img_show = mmcv.imresize(img_show, (ori_w, ori_h))
 
                 if out_dir:
-                    out_file = osp.join(out_dir, img_meta['ori_filename'])
+                    # 从父目录名中获取类名
+                    class_name = osp.basename(osp.dirname(img_meta['filename']))
+                    if class_name in model.CLASSES:
+                        if class_name != pred_class[i]:
+                            out_file = osp.join(out_dir, "incorrect", img_meta['ori_filename'])
+                        else:
+                            out_file = osp.join(out_dir, img_meta['ori_filename'])
+                    else:
+                        out_file = osp.join(out_dir, img_meta['ori_filename'])
                 else:
                     out_file = None
 
                 result_show = {
                     'pred_score': pred_score[i],
                     'pred_label': pred_label[i],
-                    'pred_class': pred_class[i]
+                    'pred_class': pred_class[i],
+                    'all_scores': scores[i]
                 }
                 model.module.show_result(
                     img_show,
